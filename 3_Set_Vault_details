@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     parameters {
-        string(defaultValue: "s.8Vch60ePn8E1lZDhLPYB62PG", description: 'VAULT_TOKEN', name: 'VAULT_TOKEN')
-        string(defaultValue: "http://13.229.122.189:8200", description: 'VAULT_ADDR', name: 'VAULT_ADDR')
+        string(defaultValue: "", description: 'VAULT_TOKEN', name: 'VAULT_TOKEN')
+        string(defaultValue: "http://vault.com:8200", description: 'VAULT_ADDR', name: 'VAULT_ADDR')
         choice(choices: "mongodb", description: 'SECRET_ENGINE', name: 'SECRET_ENGINE')
         string(defaultValue: "", description: 'MONGODB_SERVER', name: 'MONGODB_SERVER')
         string(defaultValue: "admin", description: 'MONGODB_UNAME', name: 'MONGODB_UNAME')
