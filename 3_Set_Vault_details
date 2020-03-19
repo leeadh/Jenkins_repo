@@ -1,0 +1,51 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(defaultValue: "s.8Vch60ePn8E1lZDhLPYB62PG", description: 'VAULT_TOKEN', name: 'VAULT_TOKEN')
+        string(defaultValue: "http://13.229.122.189:8200", description: 'VAULT_ADDR', name: 'VAULT_ADDR')
+        choice(choices: "mongodb", description: 'SECRET_ENGINE', name: 'SECRET_ENGINE')
+        string(defaultValue: "", description: 'MONGODB_SERVER', name: 'MONGODB_SERVER')
+        string(defaultValue: "admin", description: 'MONGODB_UNAME', name: 'MONGODB_UNAME')
+        string(defaultValue: "password", description: 'MONGODB_PWORD', name: 'MONGODB_PWORD')
+        string(defaultValue: "31273", description: 'MOGODB_PORT', name: 'MOGODB_PORT')
+        string(defaultValue: "user", description: 'MONGODB', name: 'MONGODB')
+        choice(choices: "read\nwrite", description: 'MONGODB_ROLE', name: 'MONGODB_ROLE')
+    }
+
+    stages {
+        stage("Setting Vault Params") {
+            steps {
+                sh """
+                    export VAULT_ADDR=${params.VAULT_ADDR}
+                    export VAULT_TOKEN=${params.VAULT_TOKEN}
+                """
+            }
+        }
+        //second stage
+        stage("Enabling secret engine in Vault") {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh """
+                        vault secrets enable ${params.SECRET_ENGINE}
+                    """
+
+                }
+
+            }
+        }
+
+        
+        stage("Setting Vault data") {
+            
+            steps {
+
+                sh """
+                    vault write mongodb/config/connection uri='mongodb://${params.MONGODB_UNAME}:${params.MONGODB_PWORD}@${params.MONGODB_SERVER}:${params.MOGODB_PORT}/admin'
+                    vault write mongodb/roles/readonly db=${params.MONGODB} roles='[ "${params.MONGODB_ROLE}"]'
+                    vault read mongodb/creds/readonly
+                """
+            }
+        }
+    }
+}
